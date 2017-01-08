@@ -99,7 +99,7 @@ var handlerCacheFromDir = function (dirOrDirs) {
           if (_.isPlainObject(controller)) {
             _.each(controller, function (value, name) {
               var handlerId = getFullQualifiedHandlerId(controllerName, name);
-              console.log(handlerId);
+              debug('Loaded controller %s', handlerId);
 
               handlerCache[handlerId] = value;
             });
@@ -382,7 +382,7 @@ exports = module.exports = function (options) {
 
     handlerCache = options.controllers;
   } else {
-    // Create the handler cache from the modules in the controllers directory
+    // Create the handler cache from the modules in the controllers direcory
     handlerCache = handlerCacheFromDir(options.controllers);
   }
 
