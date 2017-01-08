@@ -65,7 +65,8 @@ var getFullQualifiedHandlerId = function(controller, handler) {
 };
 var handlerCacheFromDir = function (dirOrDirs) {
   var handlerCache = {};
-  var jsFileRegex = /\.(coffee|js)$/;
+  var controllerFileRegex = /\.controller\.js$/;
+  var jsFileRegex = /\.js$/;
   var dirs = [];
 
 
@@ -77,18 +78,19 @@ var handlerCacheFromDir = function (dirOrDirs) {
 
   var recursiveFileList = function(parent) {
     _.each(fs.readdirSync(parent), function(file) {
+      var controllerName = file.replace(jsFileRegex, '');
+
       var child = path.join(parent, file);
       if (fs.statSync(child).isDirectory()) {
         recursiveFileList(child);
       } else {
 
+
         file = child;
 
-        var controllerName = file.replace(jsFileRegex, '');
         var controller;
 
-        if (file.match(jsFileRegex)) {
-
+        if (file.match(controllerFileRegex)) {
           file = path.resolve(file);
           controller = require(file);
 
@@ -97,28 +99,9 @@ var handlerCacheFromDir = function (dirOrDirs) {
           if (_.isPlainObject(controller)) {
             _.each(controller, function (value, name) {
               var handlerId = getFullQualifiedHandlerId(controllerName, name);
+              console.log(handlerId);
 
-              debug('      %s%s', handlerId, (_.isFunction(value) ? '' : ' (not a function, skipped)'));
-
-              // TODO: Log this situation
-              if (_.isFunction(value) && !handlerCache[handlerId]) {
-                var handlerExists = false;
-
-                _.each(dirs, function(topLevel) {
-                  controllerName = path.resolve(controllerName);
-                  topLevel = path.resolve(topLevel);
-
-                  if(controllerName.indexOf(topLevel) === 0) {
-                    var relativeController = controllerName.substr(topLevel.length + 1);
-                    handlerId = getFullQualifiedHandlerId(relativeController, name);
-                    handlerExists = handlerCache[handlerId] !== undefined;
-                  }
-                });
-
-                if (!handlerExists) {
-                  handlerCache[handlerId] = value;
-                }
-              }
+              handlerCache[handlerId] = value;
             });
           }
         }
